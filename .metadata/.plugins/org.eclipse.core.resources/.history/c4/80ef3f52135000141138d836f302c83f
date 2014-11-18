@@ -1,0 +1,27 @@
+package com.trwth.member;
+
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.ListView;
+
+public class ListMain extends Activity {
+
+	private ListView listview;  // ListView와 listview의 차이는 뭔가요?
+	 // 데이터를 연결할 Adapter
+	 DataAdapter adapter;
+	 // 데이터를 담을 자료구조
+	 ArrayList<Data> alist;  //
+	 
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.list_main);
+		
+		
+		
+	}
+
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:key="option_preference"
+    android:title="@string/member_option"
+    android:summary="@string/prefSummary">
+    
+ 	<ListPreference
+ 	    android:key="@string/selected_sort_option"
+ 	    android:title="@string/listTitle"
+ 	    android:summary="@string/listSummary"
+ 	    android:entries="@array/sort_options"
+ 	    android:entryValues="@array/sort_option_values"
+ 	    android:dialogTitle="@string/dialogTitle"
+ 	    android:defaultValue="@string/sort_option_default"/>
+ 	
+</PreferenceScreen>

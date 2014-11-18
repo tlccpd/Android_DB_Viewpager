@@ -1,0 +1,11 @@
+package com.trwth.member;
+
+import android.preference.PreferenceActivity;
+
+public class SettingActivity extends PreferenceActivity {
+
+	public SettingActivity() {
+		// TODO Auto-generated constructor stub
+	}
+
+}

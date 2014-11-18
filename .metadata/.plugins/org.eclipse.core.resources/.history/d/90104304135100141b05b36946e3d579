@@ -1,0 +1,261 @@
+package com.trwth.member;
+
+import java.io.File;
+
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Message;
+import android.provider.MediaStore;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.Toast;
+
+
+
+public class MainActivity extends Activity {
+	
+	String ident;
+	String ag;
+	String gen;
+	
+	Context context;
+	DbAdapter dba;
+	
+	
+	EditText name;
+	EditText age;
+	RadioButton gender_m;
+	RadioButton gender_w;
+	
+	Button cancel;
+	Button confirm;
+	Button show;
+	Button reset;
+	Button img_file;
+	
+	
+	
+	
+	DatabaseHelper dbhelp;
+	Data datum;
+	
+	
+	Bitmap bmp;
+	String img_path;
+	Uri uri;
+	
+	private int REQ_PICK_IMG=1;
+	private int REQ_SETTING=2;
+	
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		
+		name=(EditText)findViewById(R.id.name);
+		age=(EditText)findViewById(R.id.age);
+		
+		cancel = (Button)findViewById(R.id.cancel);
+		confirm = (Button)findViewById(R.id.confirm);
+		show = (Button)findViewById(R.id.list_show);
+		reset = (Button)findViewById(R.id.reset);
+		img_file = (Button)findViewById(R.id.img);
+		
+		gender_m = (RadioButton)findViewById(R.id.radioButton1);
+		gender_w = (RadioButton)findViewById(R.id.radioButton2);
+		
+		dba=new DbAdapter(this);		
+		dba.open();
+		
+		confirm.setOnClickListener(new OnClickListener() {
+			private AlertDialog.Builder builder;
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+				if(datum.getPath()==null){
+					builder = new AlertDialog.Builder(getApplicationContext());
+					builder.setTitle("IMAGE MISSING");
+					builder.setMessage("Add image,or not?");
+					builder.setPositiveButton("OK",new AlertDialog.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							// TODO Auto-generated method stub
+							Toast.makeText(getApplicationContext(), "Move to gallery", Toast.LENGTH_SHORT).show();
+							Intent intent = new Intent(Intent.ACTION_PICK);
+							intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+							intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+							startActivityForResult(intent, REQ_PICK_IMG);							
+						}
+					});
+					builder.setNegativeButton("CANCEL", new AlertDialog.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							// TODO Auto-generated method stub
+							dba.createMember(datum.getName(),datum.getAge(),datum.getGender(),null);
+						}
+					}).create();
+				}
+			}
+		}
+				
+				else if(gender_m.isChecked()){
+					img_path = uri.toString();
+					datum=new Data(name.getText().toString(),age.getText().toString(),null,img_path);
+					
+					gen = "MAN";
+					datum.setGender(gen);
+					dba.createMember(datum.getName(),datum.getAge(),datum.getGender(),datum.getPath());
+					
+				}
+				else if(gender_w.isChecked()){
+					img_path = uri.toString();
+					datum=new Data(name.getText().toString(),age.getText().toString(),null,img_path);
+					
+					gen="WOMAN";
+					datum.setGender(gen);
+					dba.createMember(datum.getName(),datum.getAge(),datum.getGender(),datum.getPath());
+					
+				}
+					
+			}
+					
+				
+				Log.v("image", "IMAGE : "+datum.getPath());
+		
+	}
+			
+		
+		
+		
+		show.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(MainActivity.this,ListMain.class);
+				startActivity(intent);							
+			}
+		});
+		
+		reset.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				dba.deleteAll();				
+			}
+		});
+		
+		cancel.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				name.setText("");
+				age.setText("");
+				if(gender_m.isChecked())
+					gender_m.setChecked(false);
+				else if(gender_w.isChecked())
+					gender_w.setChecked(false);
+				
+			}
+		});
+		img_file.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(Intent.ACTION_PICK);
+				intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+				intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+				startActivityForResult(intent, REQ_PICK_IMG);
+			}
+		});
+		
+		
+	}
+	
+	
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		if (requestCode == REQ_PICK_IMG){
+			
+			if (resultCode == Activity.RESULT_OK){				
+				Cursor c = getContentResolver().query(data.getData(), null,null,null,null);
+				c.moveToNext();
+				String path = c.getString(c.getColumnIndex(MediaStore.MediaColumns.DATA));
+				uri = Uri.fromFile(new File(path));
+				
+				c.close();
+			}
+		}
+		if(requestCode == REQ_SETTING){
+			if(resultCode == Activity.RESULT_OK){
+				setOption();
+			}
+		}
+	}
+
+/*	public String changeUri(Uri uri){
+
+		  Cursor c=getContentResolver().query(uri,null,null,null,null);
+		  c.moveToNext();
+		  String path=c.getString(c.getColumnIndex(MediaStore.MediaColumns.DATA));
+		  return path;
+	}*/
+
+
+
+
+	private void setOption() {
+		// TODO Auto-generated method stub
+		SharedPreferences prefs = getSharedPreferences("com.trwth.member", 0);
+		String option= prefs.getString(this.getResources().getString(R.string.selected_sort_option), this.getResources().getString(R.string.sort_option_default));
+		String[] option_txt=this.getResources().getStringArray(R.array.sort_options);
+		
+		Toast.makeText(getApplicationContext(), option_txt[Integer.parseInt(option)], Toast.LENGTH_SHORT).show();
+	}
+
+
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		if(item.getItemId() ==R.id.action_settings){
+			Intent intent = new Intent(MainActivity.this,SettingActivity.class);
+			startActivityForResult(intent, REQ_SETTING);
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+}
