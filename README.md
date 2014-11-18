@@ -1,4 +1,5 @@
 Android_DB_Viewpager
 ====================
-This App is for the users who want profile infromations of their known people(name, gender, age,image) and store SQLite DataBase.
-And the 'Information' tab will lead you to view the informations you entered at MainActivity.class(this is at the 'Profile' tab)
+This App is for the users who want to profile the infromations such as name, gender, age and image 
+of the people concerned and store at SQLite DataBase.
+The 'Profile' tab will lead you to see the detailed informations you supplied at the 'Information' tab.
